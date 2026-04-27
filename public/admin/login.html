@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login — OneXportal</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="/img/isaiah-amos.png" type="image/png">
+  <style>
+    :root {
+      --primary:     #7C3AED;
+      --primary-h:   #6D28D9;
+      --bg:          #0F0A1F;
+      --surface:     #1A1535;
+      --border:      #2D2060;
+      --text:        #EDE9FE;
+      --text-muted:  #9CA3AF;
+      --error:       #EF4444;
+      --success:     #22C55E;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px 44px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    }
+
+    .login-brand {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .login-brand h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus { border-color: var(--primary); }
+    input.error { border-color: var(--error); }
+
+    .field-error {
+      font-size: 0.78rem;
+      color: var(--error);
+      min-height: 14px;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 8px;
+    }
+
+    .btn-login:hover  { background: var(--primary-h); transform: translateY(-2px); }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .form-feedback {
+      margin-top: 16px;
+      padding: 11px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      text-align: center;
+      display: none;
+    }
+
+    .form-feedback.error   { display: block; background: rgba(239,68,68,0.1); color: var(--error); border: 1px solid var(--error); }
+    .form-feedback.success { display: block; background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid var(--success); }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .back-link a { color: var(--primary); text-decoration: none; }
+    .back-link a:hover { text-decoration: underline; }
+
+    /* Honeypot */
+    .hp { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="login-brand">
+      <h1>Welcome Admin</h1>
+    </div>
+
+    <form id="login-form" novalidate>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          autocomplete="username"
+          required
+          maxlength="60"
+          placeholder="Enter username"
+        >
+        <span class="field-error" id="username-error"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          autocomplete="current-password"
+          required
+          minlength="8"
+          maxlength="128"
+          placeholder="Enter password"
+        >
+        <span class="field-error" id="password-error"></span>
+      </div>
+
+      <!-- Honeypot -->
+      <div class="hp" aria-hidden="true">
+        <input type="text" name="_honey" tabindex="-1" autocomplete="off">
+      </div>
+
+      <button type="submit" class="btn-login" id="submit-btn">
+        <span>Sign In</span>
+      </button>
+
+      <div class="form-feedback" id="form-feedback"></div>
+    </form>
+
+    <p class="back-link"><a href="/">&larr; Back to portfolio</a></p>
+  </div>
+
+  <script>
+  'use strict';
+
+  const form     = document.getElementById('login-form');
+  const feedback = document.getElementById('form-feedback');
+  const submitBtn= document.getElementById('submit-btn');
+
+  function showError(field, msg) {
+    const input = document.getElementById(field);
+    const errEl = document.getElementById(`${field}-error`);
+    if (msg) { input.classList.add('error'); errEl.textContent = msg; }
+    else      { input.classList.remove('error'); errEl.textContent = ''; }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    feedback.className = 'form-feedback';
+    feedback.textContent = '';
+
+    const username = form.username.value.trim();
+    const password = form.password.value;
+    const honey    = form._honey.value;
+
+    // Honeypot
+    if (honey) return;
+
+    let valid = true;
+
+    if (!username) { showError('username', 'Username is required.'); valid = false; }
+    else showError('username', '');
+
+    if (!password || password.length < 8) { showError('password', 'Password must be at least 8 characters.'); valid = false; }
+    else showError('password', '');
+
+    if (!valid) return;
+
+    submitBtn.disabled = true;
+    submitBtn.querySelector('span').textContent = 'Signing in…';
+
+    try {
+      const res  = await fetch('/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.redirect) {
+        feedback.className   = 'form-feedback success';
+        feedback.textContent = 'Login successful. Redirecting…';
+        setTimeout(() => window.location.href = data.redirect, 800);
+      } else {
+        feedback.className   = 'form-feedback error';
+        feedback.textContent = data.message || 'Invalid credentials.';
+        form.password.value  = '';
+      }
+    } catch {
+      feedback.className   = 'form-feedback error';
+      feedback.textContent = 'Network error. Please try again.';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.querySelector('span').textContent = 'Sign In';
+    }
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — OneXportal CMS</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" href="/img/isaiah-amos.png" type="image/png">
+  <style>
+    :root {
+      --primary:     #7C3AED;
+      --primary-h:   #6D28D9;
+      --bg:          #0F0A1F;
+      --surface:     #1A1535;
+      --surface2:    #211945;
+      --border:      #2D2060;
+      --text:        #EDE9FE;
+      --text-muted:  #9CA3AF;
+      --error:       #EF4444;
+      --success:     #22C55E;
+      --warning:     #F59E0B;
+      --nav-h:       60px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── TOP NAV ── */
+    .admin-nav {
+      position: fixed; top: 0; left: 0; width: 100%;
+      height: var(--nav-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+    }
+
+    .admin-nav-brand {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .admin-nav-brand span { color: var(--primary); }
+
+    .admin-nav-actions { display: flex; align-items: center; gap: 16px; }
+
+    .nav-user {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-family: 'Fira Code', monospace;
+    }
+
+    .btn-logout {
+      padding: 7px 18px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 999px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-logout:hover { border-color: var(--error); color: var(--error); }
+
+    /* ── MAIN LAYOUT ── */
+    .admin-main {
+      margin-top: var(--nav-h);
+      padding: 32px 24px;
+      max-width: 1000px;
+      margin-inline: auto;
+      margin-top: calc(var(--nav-h) + 24px);
+    }
+
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 800;
+      margin-bottom: 28px;
+    }
+
+    /* ── ADD PROJECT FORM ── */
+    .add-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 32px;
+      margin-bottom: 40px;
+    }
+
+    .add-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .required-star { color: var(--error); }
+
+    input[type="text"],
+    input[type="url"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px 13px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+    input.error, textarea.error, select.error { border-color: var(--error); }
+    input[type="file"] {
+      padding: 8px;
+      background: var(--bg);
+      border: 1.5px dashed var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      width: 100%;
+    }
+
+    textarea { resize: vertical; min-height: 90px; }
+    select option { background: var(--surface); }
+
+    .field-error {
+      font-size: 0.75rem;
+      color: var(--error);
+      min-height: 14px;
+    }
+
+    .form-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 6px;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border-radius: 999px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-h); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover { color: var(--text); border-color: var(--text-muted); }
+
+    .form-msg {
+      font-size: 0.83rem;
+      padding: 9px 13px;
+      border-radius: 7px;
+      display: none;
+    }
+
+    .form-msg.success { display: block; background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid var(--success); }
+    .form-msg.error   { display: block; background: rgba(239,68,68,0.1); color: var(--error); border: 1px solid var(--error); }
+
+    /* ── PROJECTS LIST ── */
+    .projects-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .projects-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .project-count {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 10px 14px;
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover { background: var(--surface2); }
+
+    tbody td {
+      padding: 12px 14px;
+      vertical-align: middle;
+      color: var(--text);
+    }
+
+    .td-thumb {
+      width: 60px; height: 40px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: var(--border);
+    }
+
+    .td-title { font-weight: 600; max-width: 200px; }
+    .td-desc  { color: var(--text-muted); max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .td-cat   { font-family: 'Fira Code', monospace; font-size: 0.75rem; color: var(--primary); }
+
+    .td-actions { display: flex; gap: 8px; }
+
+    .btn-icon {
+      width: 32px; height: 32px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: 0.15s;
+    }
+
+    .btn-icon:hover           { color: var(--text); border-color: var(--text-muted); }
+    .btn-icon.delete:hover    { background: rgba(239,68,68,0.12); color: var(--error); border-color: var(--error); }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px;
+      color: var(--text-muted);
+    }
+
+    .empty-state i { font-size: 2.5rem; color: var(--border); margin-bottom: 12px; display: block; }
+
+    /* Loading */
+    .loading-row td { text-align: center; padding: 40px; color: var(--text-muted); }
+
+    /* Confirm overlay */
+    .overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .overlay.show { display: flex; }
+
+    .confirm-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px 36px;
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .confirm-box h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; margin-bottom: 10px; }
+    .confirm-box p  { font-size: 0.87rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+    .confirm-actions { display: flex; gap: 12px; justify-content: center; }
+    .btn-danger { background: var(--error); color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .add-card  { padding: 20px; }
+      .admin-main { padding: 20px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="admin-nav">
+    <div class="admin-nav-brand">One<span>X</span>portal <small style="font-size:0.7rem;color:var(--text-muted);font-weight:400">CMS</small></div>
+    <div class="admin-nav-actions">
+      <span class="nav-user" id="nav-user">…</span>
+      <a href="/" target="_blank" rel="noopener" class="btn-ghost btn" style="padding:6px 14px;font-size:0.78rem">
+        <i class="fas fa-external-link-alt"></i> Portfolio
+      </a>
+      <button class="btn-logout" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+    <h1 class="page-title">Projects</h1>
+
+    <!-- ADD / EDIT FORM -->
+    <div class="add-card">
+      <h2 id="form-title"><i class="fas fa-plus-circle" style="color:var(--primary);margin-right:8px"></i>Add New Project</h2>
+      <form id="project-form" novalidate enctype="multipart/form-data">
+        <input type="hidden" id="edit-id" name="editId">
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label for="p-title">Title <span class="required-star">*</span></label>
+            <input type="text" id="p-title" name="title" placeholder="e.g. CheezyStreet Landing Page" maxlength="120" required>
+            <span class="field-error" id="err-title"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="p-category">Category</label>
+            <select id="p-category" name="category">
+              <option value="">— Select category —</option>
+              <option value="Landing Page">Landing Page</option>
+              <option value="E-Commerce">E-Commerce</option>
+              <option value="Blog">Blog</option>
+              <option value="WordPress">WordPress</option>
+              <option value="Graphic Design">Graphic Design</option>
+              <option value="Classified Ads">Classified Ads</option>
+              <option value="Real Estate">Real Estate</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group full">
+            <label for="p-description">Description <span class="required-star">*</span></label>
+            <textarea id="p-description" name="description" placeholder="Brief description of the project…" maxlength="400" required></textarea>
+            <span class="field-error" id="err-description"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="p-image">Project Image <span class="required-star" id="img-required">*</span></label>
+            <input type="file" id="p-image" name="image" accept="image/jpeg,image/png,image/webp">
+            <span class="field-error" id="err-image"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="p-liveUrl">Live URL</label>
+            <input type="url" id="p-liveUrl" name="liveUrl" placeholder="https://example.com" maxlength="500">
+            <span class="field-error" id="err-liveUrl"></span>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="form-submit-btn">
+              <i class="fas fa-plus"></i>
+              <span id="submit-label">Add Project</span>
+            </button>
+            <button type="button" class="btn btn-ghost" id="cancel-edit" style="display:none">
+              Cancel Edit
+            </button>
+            <span class="form-msg" id="form-msg"></span>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+    <!-- PROJECTS TABLE -->
+    <div class="projects-header">
+      <h2>All Projects</h2>
+      <span class="project-count" id="project-count">—</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Live URL</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="projects-tbody">
+          <tr class="loading-row">
+            <td colspan="6"><i class="fas fa-circle-notch fa-spin"></i> Loading…</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- DELETE CONFIRM OVERLAY -->
+  <div class="overlay" id="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="confirm-box">
+      <h3 id="confirm-title">Delete Project?</h3>
+      <p>This action cannot be undone. The project and its image will be permanently removed.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-danger" id="confirm-delete-btn">Yes, Delete</button>
+        <button class="btn btn-ghost" id="cancel-delete-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  'use strict';
+
+  // ── HELPERS ──────────────────────────────────
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = String(str ?? '');
+    return d.innerHTML;
+  }
+
+  function showMsg(msg, type) {
+    const el = document.getElementById('form-msg');
+    el.className = `form-msg ${type}`;
+    el.textContent = msg;
+    setTimeout(() => { el.className = 'form-msg'; el.textContent = ''; }, 4000);
+  }
+
+  function setFieldErr(id, msg) {
+    const el = document.getElementById(`err-${id}`);
+    const inp = document.getElementById(`p-${id}`);
+    if (el)  el.textContent  = msg;
+    if (inp) inp.classList.toggle('error', !!msg);
+  }
+
+  // ── AUTH STATE ───────────────────────────────
+  async function checkAuth() {
+    const res = await fetch('/admin/me');
+    if (!res.ok) { window.location.href = '/admin/login'; return; }
+    const { username } = await res.json();
+    document.getElementById('nav-user').textContent = username;
+  }
+
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await fetch('/admin/logout', { method: 'POST' });
+    window.location.href = '/admin/login';
+  });
+
+  // ── LOAD PROJECTS ────────────────────────────
+  let allProjects = [];
+
+  async function loadProjects() {
+    const tbody = document.getElementById('projects-tbody');
+    try {
+      const res  = await fetch('/api/projects?all=1', { credentials: 'include' });
+      if (!res.ok) throw new Error();
+      const { projects } = await res.json();
+      allProjects = projects;
+      document.getElementById('project-count').textContent = `${projects.length} project${projects.length !== 1 ? 's' : ''}`;
+
+      if (projects.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-images"></i><p>No projects yet. Add your first one above.</p></div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = projects.map(p => `
+        <tr data-id="${esc(p._id)}">
+          <td><img class="td-thumb" src="${esc(p.imageUrl)}" alt="${esc(p.title)}" loading="lazy"></td>
+          <td class="td-title">${esc(p.title)}</td>
+          <td class="td-desc" title="${esc(p.description)}">${esc(p.description)}</td>
+          <td class="td-cat">${esc(p.category || '—')}</td>
+          <td>${p.liveUrl ? `<a href="${esc(p.liveUrl)}" target="_blank" rel="noopener" style="color:var(--primary);font-size:0.82rem">${esc(p.liveUrl.replace(/^https?:\/\//, ''))}</a>` : '<span style="color:var(--text-muted)">—</span>'}</td>
+          <td class="td-actions">
+            <button class="btn-icon edit-btn" data-id="${esc(p._id)}" title="Edit" aria-label="Edit ${esc(p.title)}"><i class="fas fa-pen"></i></button>
+            <button class="btn-icon delete btn delete-btn" data-id="${esc(p._id)}" title="Delete" aria-label="Delete ${esc(p.title)}"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+
+      tbody.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => startEdit(btn.dataset.id)));
+      tbody.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', () => startDelete(btn.dataset.id)));
+
+    } catch {
+      tbody.innerHTML = `<tr class="loading-row"><td colspan="6" style="color:var(--error)">Could not load projects.</td></tr>`;
+    }
+  }
+
+  // ── ADD / EDIT FORM ──────────────────────────
+  const form = document.getElementById('project-form');
+  let isEditing = false;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErrors();
+
+    const title       = document.getElementById('p-title').value.trim();
+    const description = document.getElementById('p-description').value.trim();
+    const category    = document.getElementById('p-category').value;
+    const liveUrl     = document.getElementById('p-liveUrl').value.trim();
+    const imageFile   = document.getElementById('p-image').files[0];
+    const editId      = document.getElementById('edit-id').value;
+
+    let valid = true;
+
+    if (!title)            { setFieldErr('title', 'Title is required.');           valid = false; }
+    if (!description)      { setFieldErr('description', 'Description is required.'); valid = false; }
+    if (!isEditing && !imageFile) { setFieldErr('image', 'Please select an image.'); valid = false; }
+    if (imageFile) {
+      if (imageFile.size > 3 * 1024 * 1024) { setFieldErr('image', 'Image must be under 3 MB.'); valid = false; }
+      if (!['image/jpeg','image/png','image/webp'].includes(imageFile.type)) { setFieldErr('image', 'Allowed types: JPEG, PNG, WebP.'); valid = false; }
+    }
+    if (liveUrl && !/^https?:\/\/.+/.test(liveUrl)) { setFieldErr('liveUrl', 'Enter a valid URL starting with http:// or https://'); valid = false; }
+
+    if (!valid) return;
+
+    const btn = document.getElementById('form-submit-btn');
+    btn.disabled = true;
+
+    const fd = new FormData();
+    fd.append('title', title);
+    fd.append('description', description);
+    fd.append('category', category);
+    fd.append('liveUrl', liveUrl);
+    if (imageFile) fd.append('image', imageFile);
+
+    try {
+      const url    = isEditing ? `/admin/api/projects/${editId}` : '/admin/api/projects';
+      const method = isEditing ? 'PUT' : 'POST';
+      const res    = await fetch(url, { method, body: fd, credentials: 'include' });
+      const data   = await res.json();
+
+      if (res.ok) {
+        showMsg(isEditing ? 'Project updated.' : 'Project added.', 'success');
+        form.reset();
+        cancelEdit();
+        loadProjects();
+      } else {
+        showMsg(data.message || 'Something went wrong.', 'error');
+      }
+    } catch {
+      showMsg('Network error. Try again.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  function clearErrors() {
+    ['title','description','image','liveUrl'].forEach(f => setFieldErr(f, ''));
+  }
+
+  function startEdit(id) {
+    const p = allProjects.find(x => x._id === id);
+    if (!p) return;
+    isEditing = true;
+    document.getElementById('edit-id').value           = p._id;
+    document.getElementById('p-title').value           = p.title;
+    document.getElementById('p-description').value     = p.description;
+    document.getElementById('p-category').value        = p.category || '';
+    document.getElementById('p-liveUrl').value         = p.liveUrl || '';
+    document.getElementById('img-required').textContent = '';
+    document.getElementById('form-title').innerHTML    = '<i class="fas fa-pen" style="color:var(--primary);margin-right:8px"></i>Edit Project';
+    document.getElementById('submit-label').textContent = 'Save Changes';
+    document.getElementById('cancel-edit').style.display = 'inline-flex';
+    document.querySelector('.add-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function cancelEdit() {
+    isEditing = false;
+    form.reset();
+    document.getElementById('edit-id').value = '';
+    document.getElementById('img-required').textContent = '*';
+    document.getElementById('form-title').innerHTML   = '<i class="fas fa-plus-circle" style="color:var(--primary);margin-right:8px"></i>Add New Project';
+    document.getElementById('submit-label').textContent = 'Add Project';
+    document.getElementById('cancel-edit').style.display = 'none';
+    clearErrors();
+  }
+
+  document.getElementById('cancel-edit').addEventListener('click', cancelEdit);
+
+  // ── DELETE ───────────────────────────────────
+  let pendingDeleteId = null;
+  const overlay       = document.getElementById('confirm-overlay');
+
+  function startDelete(id) {
+    pendingDeleteId = id;
+    overlay.classList.add('show');
+  }
+
+  document.getElementById('cancel-delete-btn').addEventListener('click', () => {
+    pendingDeleteId = null;
+    overlay.classList.remove('show');
+  });
+
+  document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+    if (!pendingDeleteId) return;
+    overlay.classList.remove('show');
+    try {
+      const res = await fetch(`/admin/api/projects/${pendingDeleteId}`, {
+        method: 'DELETE', credentials: 'include'
+      });
+      if (res.ok) { showMsg('Project deleted.', 'success'); loadProjects(); }
+      else        showMsg('Delete failed.', 'error');
+    } catch { showMsg('Network error.', 'error'); }
+    pendingDeleteId = null;
+  });
+
+  // ── INIT ─────────────────────────────────────
+  checkAuth();
+  loadProjects();
+  </script>
+</body>
+</html>
