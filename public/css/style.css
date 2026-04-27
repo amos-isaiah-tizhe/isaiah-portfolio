@@ -462,9 +462,10 @@ button { font-family: inherit; cursor: pointer; }
 .hero-cta {
   display: flex;
   gap: var(--space-sm);
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+  margin-bottom: bar(--space-md);
 }
 
 /* Optional: improve button visibility on dark bg */
@@ -844,15 +845,6 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .footer a:hover { color: var(--color-primary); }
-
-.footer-admin-link {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  opacity: 0.5;
-  transition: opacity var(--transition);
-}
-
-.footer-admin-link:hover { opacity: 1; color: var(--color-primary); }
 
 
 /* --- REVEAL ANIMATION --- */
