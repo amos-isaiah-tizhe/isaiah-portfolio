@@ -14,7 +14,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // ── Rate limiters ─────────────────────────────
 const contactLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 2,
   message: { message: 'Too many messages sent. Please wait a few minutes.' },
   standardHeaders: true,
   legacyHeaders: false,
