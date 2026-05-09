@@ -589,9 +589,12 @@
       } else {
         showMsg(data.message || 'Something went wrong.', 'error');
       }
-    } catch {
+} catch (err) {
+      console.error('Fetch error:', err);
       showMsg('Network error. Try again.', 'error');
-    } finally {
+    }
+    
+    finally {
       btn.disabled = false;
     }
   });
