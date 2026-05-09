@@ -23,10 +23,12 @@ cloudinary.config({
 // ── Multer — Cloudinary storage ───────────────
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder:          'isaiah-portfolio',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation:  [{ width: 1200, crop: 'limit', quality: 'auto' }],
+  params: async (req, file) => {
+    return {
+      folder:          'isaiah-portfolio',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+      transformation:  [{ width: 1200, crop: 'limit', quality: 'auto' }],
+    };
   },
 });
 
