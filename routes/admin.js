@@ -1,6 +1,4 @@
 // routes/admin.js
-// Admin CMS API — authentication + project management
-
 'use strict';
 
 const router     = require('express').Router();
@@ -8,7 +6,6 @@ const rateLimit  = require('express-rate-limit');
 const multer     = require('multer');
 const validator  = require('validator');
 const cloudinary = require('cloudinary').v2;
-const CloudinaryStorage = require('multer-storage-cloudinary');
 
 const Project        = require('../models/Project');
 const ContactMessage = require('../models/ContactMessage');
@@ -20,20 +17,9 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// ── Multer — Cloudinary storage ───────────────
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => {
-    return {
-      folder:          'isaiah-portfolio',
-      allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-      transformation:  [{ width: 1200, crop: 'limit', quality: 'auto' }],
-    };
-  },
-});
-
+// ── Multer — memory storage (no disk, no extra package) ──
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 3 * 1024 * 1024 },
   fileFilter(_req, file, cb) {
     const allowed = ['image/jpeg', 'image/png', 'image/webp'];
@@ -44,6 +30,26 @@ const upload = multer({
     }
   },
 });
+
+// ── Upload buffer to Cloudinary ───────────────
+function uploadToCloudinary(buffer, mimetype) {
+  return new Promise((resolve, reject) => {
+    const ext = mimetype.split('/')[1];
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder:         'isaiah-portfolio',
+        resource_type:  'image',
+        transformation: [{ width: 1200, crop: 'limit', quality: 'auto' }],
+        format:         ext,
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+    uploadStream.end(buffer);
+  });
+}
 
 // ── Auth middleware ───────────────────────────
 function requireAuth(req, res, next) {
@@ -69,15 +75,12 @@ const loginLimiter = rateLimit({
 router.post('/login', loginLimiter, (req, res) => {
   const { username, password, _honey } = req.body;
 
-  // Honeypot
   if (_honey) return res.json({ redirect: '/admin/dashboard' });
 
-  // Presence check
   if (!username || !password) {
     return res.status(400).json({ message: 'Username and password are required.' });
   }
 
-  // Length guards
   if (typeof username !== 'string' || username.length > 60) {
     return res.status(400).json({ message: 'Invalid credentials.' });
   }
@@ -97,7 +100,6 @@ router.post('/login', loginLimiter, (req, res) => {
     }, 400);
   }
 
-  // Regenerate session ID — prevents session fixation
   req.session.regenerate((err) => {
     if (err) return res.status(500).json({ message: 'Session error. Try again.' });
     req.session.adminId  = 'admin';
@@ -121,7 +123,7 @@ router.get('/me', requireAuth, (req, res) => {
 
 
 // ════════════════════════════════════════════
-//  PROJECT CRUD  (all protected)
+//  PROJECT CRUD
 // ════════════════════════════════════════════
 
 // POST /admin/api/projects — create
@@ -130,7 +132,6 @@ router.post('/api/projects', requireAuth, upload.single('image'), async (req, re
     const { title, description, category, liveUrl } = req.body;
 
     if (!title || !description) {
-      if (req.file) await cloudinary.uploader.destroy(req.file.filename);
       return res.status(400).json({ message: 'Title and description are required.' });
     }
 
@@ -144,23 +145,24 @@ router.post('/api/projects', requireAuth, upload.single('image'), async (req, re
     const cleanLiveUrl     = liveUrl ? liveUrl.trim() : '';
 
     if (cleanLiveUrl && !validator.isURL(cleanLiveUrl, { protocols: ['http', 'https'], require_protocol: true })) {
-      await cloudinary.uploader.destroy(req.file.filename);
       return res.status(400).json({ message: 'Invalid Live URL.' });
     }
+
+    // Upload image buffer directly to Cloudinary
+    const result = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
 
     const project = await Project.create({
       title:         cleanTitle,
       description:   cleanDescription,
       category:      cleanCategory,
       liveUrl:       cleanLiveUrl,
-      imageUrl:      req.file.path,
-      imageFilename: req.file.filename,
+      imageUrl:      result.secure_url,
+      imageFilename: result.public_id,
     });
 
     res.status(201).json({ message: 'Project created.', project });
 
   } catch (err) {
-    if (req.file) await cloudinary.uploader.destroy(req.file.filename);
     console.error('[ADMIN] POST /api/projects:', err.message);
     res.status(500).json({ message: 'Could not create project.' });
   }
@@ -170,18 +172,18 @@ router.post('/api/projects', requireAuth, upload.single('image'), async (req, re
 router.put('/api/projects/:id', requireAuth, upload.single('image'), async (req, res) => {
   try {
     const { id } = req.params;
-    if (!id.match(/^[a-f\d]{24}$/i)) return res.status(400).json({ message: 'Invalid project ID.' });
+    if (!id.match(/^[a-f\d]{24}$/i)) {
+      return res.status(400).json({ message: 'Invalid project ID.' });
+    }
 
     const project = await Project.findById(id);
     if (!project) {
-      if (req.file) await cloudinary.uploader.destroy(req.file.filename);
       return res.status(404).json({ message: 'Project not found.' });
     }
 
     const { title, description, category, liveUrl } = req.body;
 
     if (!title || !description) {
-      if (req.file) await cloudinary.uploader.destroy(req.file.filename);
       return res.status(400).json({ message: 'Title and description are required.' });
     }
 
@@ -191,25 +193,25 @@ router.put('/api/projects/:id', requireAuth, upload.single('image'), async (req,
 
     const cleanLiveUrl = liveUrl ? liveUrl.trim() : '';
     if (cleanLiveUrl && !validator.isURL(cleanLiveUrl, { protocols: ['http', 'https'], require_protocol: true })) {
-      if (req.file) await cloudinary.uploader.destroy(req.file.filename);
       return res.status(400).json({ message: 'Invalid Live URL.' });
     }
     project.liveUrl = cleanLiveUrl;
 
     // Replace image if a new one was uploaded
     if (req.file) {
+      // Delete old image from Cloudinary
       if (project.imageFilename) {
         await cloudinary.uploader.destroy(project.imageFilename);
       }
-      project.imageUrl      = req.file.path;
-      project.imageFilename = req.file.filename;
+      const result = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
+      project.imageUrl      = result.secure_url;
+      project.imageFilename = result.public_id;
     }
 
     await project.save();
     res.json({ message: 'Project updated.', project });
 
   } catch (err) {
-    if (req.file) await cloudinary.uploader.destroy(req.file.filename);
     console.error('[ADMIN] PUT /api/projects:', err.message);
     res.status(500).json({ message: 'Could not update project.' });
   }
@@ -219,12 +221,13 @@ router.put('/api/projects/:id', requireAuth, upload.single('image'), async (req,
 router.delete('/api/projects/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    if (!id.match(/^[a-f\d]{24}$/i)) return res.status(400).json({ message: 'Invalid project ID.' });
+    if (!id.match(/^[a-f\d]{24}$/i)) {
+      return res.status(400).json({ message: 'Invalid project ID.' });
+    }
 
     const project = await Project.findByIdAndDelete(id);
     if (!project) return res.status(404).json({ message: 'Project not found.' });
 
-    // Delete image from Cloudinary
     if (project.imageFilename) {
       await cloudinary.uploader.destroy(project.imageFilename);
     }
