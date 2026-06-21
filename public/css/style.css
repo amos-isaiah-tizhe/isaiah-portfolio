@@ -284,7 +284,7 @@ button { font-family: inherit; cursor: pointer; }
 
 .hero {
   
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -461,7 +461,7 @@ button { font-family: inherit; cursor: pointer; }
 
 .hero-cta {
   display: flex;
-  gap: var(--space-sm);
+  gap: var(--space-md);
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
@@ -896,10 +896,6 @@ button { font-family: inherit; cursor: pointer; }
   .hero-inner {
     padding: var(--space-md);
     gap: var(--space-sm);
-  }
-  .hero {
-  min-height: 100vh;
-  
   }
 
   /* Avatar smaller */
