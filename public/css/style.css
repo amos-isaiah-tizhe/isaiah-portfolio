@@ -209,7 +209,7 @@ button { font-family: inherit; cursor: pointer; }
   align-items: center;
   gap: 10px;
   font-family: var(--font-heading);
-  font-size: var(--text-xl)
+  font-size: var(--text-xl);
   font-weight: 700;
   color: var(--color-text);
 }
@@ -283,14 +283,14 @@ button { font-family: inherit; cursor: pointer; }
 ======================== */
 
 .hero {
-  min-height: 80vh;
+  
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding-top: var(--nav-height);
   position: relative;
   overflow: hidden;
-
   /* Background image */
   background: url('../img/amos-isaiah-tizhe-profile.png') center / cover no-repeat;
 }
@@ -316,7 +316,6 @@ button { font-family: inherit; cursor: pointer; }
 .hero-inner {
   position: relative;
   z-index: 1;
-
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -901,7 +900,7 @@ button { font-family: inherit; cursor: pointer; }
   .hero {
   min-height: 100vh;
   
-  )
+  }
 
   /* Avatar smaller */
   .hero-avatar {
