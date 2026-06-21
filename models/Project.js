@@ -23,7 +23,7 @@ const projectSchema = new mongoose.Schema(
       trim:    true,
       default: '',
       enum: {
-        values:  ['Landing Page','E-Commerce','Blog','WordPress','Graphic Design','Classified Ads','Real Estate','Other',''],
+        values:  ['Landing Page','E-Commerce','Blog','WordPress','Graphic Design','Classified Ads','Real Estate','Tools','Other',''],
         message: 'Invalid category',
       },
     },
