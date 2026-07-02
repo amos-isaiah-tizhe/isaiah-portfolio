@@ -207,7 +207,7 @@ Every admin API endpoint calls `requireAuth` middleware first. If there is no va
 When you move from local testing to a live server:
 
 1. Set `NODE_ENV=production` in your `.env`
-2. Set `ALLOWED_ORIGIN` to your actual domain, e.g. `https://1xportalhub.com.ng`
+2. Set `ALLOWED_ORIGIN` to your actual domain, e.g. `https://founder.onexportalhq.com`
 3. Use a strong, unique `SESSION_SECRET` and `ADMIN_PASSWORD`
 4. Serve the app behind HTTPS (use Nginx + Let's Encrypt, or a hosting platform)
 5. Use `pm2` to keep the server running:
