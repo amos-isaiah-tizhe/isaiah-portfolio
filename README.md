@@ -113,22 +113,22 @@ Visit `http://localhost:3000` in your browser.
 
 ### Public Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/projects` | Returns all projects (JSON) |
-| POST | `/api/contact` | Saves a contact form message |
+| Method | Endpoint        | Description                  |
+| ------ | --------------- | ---------------------------- |
+| GET    | `/api/projects` | Returns all projects (JSON)  |
+| POST   | `/api/contact`  | Saves a contact form message |
 
 ### Admin Endpoints (require login)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/admin/login` | Log in with username + password |
-| POST | `/admin/logout` | Log out, destroy session |
-| GET | `/admin/me` | Returns logged-in username |
-| POST | `/admin/api/projects` | Add a new project (with image upload) |
-| PUT | `/admin/api/projects/:id` | Edit an existing project |
-| DELETE | `/admin/api/projects/:id` | Delete a project and its image |
-| GET | `/admin/api/messages` | View all contact form submissions |
+| Method | Endpoint                  | Description                           |
+| ------ | ------------------------- | ------------------------------------- |
+| POST   | `/admin/login`            | Log in with username + password       |
+| POST   | `/admin/logout`           | Log out, destroy session              |
+| GET    | `/admin/me`               | Returns logged-in username            |
+| POST   | `/admin/api/projects`     | Add a new project (with image upload) |
+| PUT    | `/admin/api/projects/:id` | Edit an existing project              |
+| DELETE | `/admin/api/projects/:id` | Delete a project and its image        |
+| GET    | `/admin/api/messages`     | View all contact form submissions     |
 
 ---
 
@@ -160,11 +160,11 @@ Both the contact form and the login form include a hidden input field (`_honey`)
 
 ### Rate limiting
 
-| Route | Limit |
-|-------|-------|
-| All routes | 200 requests / 15 min per IP |
+| Route               | Limit                         |
+| ------------------- | ----------------------------- |
+| All routes          | 200 requests / 15 min per IP  |
 | POST `/api/contact` | 5 submissions / 15 min per IP |
-| POST `/admin/login` | 10 attempts / 15 min per IP |
+| POST `/admin/login` | 10 attempts / 15 min per IP   |
 
 ### Session security
 
@@ -234,8 +234,10 @@ Double-check `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `.env`. Restart the server
 
 **Port already in use**  
 Change `PORT=3001` in `.env` or kill the process using port 3000:
+
 ```bash
 lsof -i :3000
 kill -9 <PID>
 ```
-Live url: https://amos-isaiah-tizhe.onrender.com
+
+Live url: https://founder.onexportalhq.com
