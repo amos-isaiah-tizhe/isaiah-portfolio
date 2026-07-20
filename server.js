@@ -7,19 +7,19 @@
 
 require('dotenv').config();
 
-const express    = require('express');
-const mongoose   = require('mongoose');
-const path       = require('path');
-const helmet     = require('helmet');
-const cors       = require('cors');
-const rateLimit  = require('express-rate-limit');
-const session    = require('express-session');
+const express = require('express');
+const mongoose = require('mongoose');
+const path = require('path');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const session = require('express-session');
 const MongoStore = require('connect-mongo');
 
 const publicRouter = require('./routes/public');
-const adminRouter  = require('./routes/admin');
+const adminRouter = require('./routes/admin');
 
-const app  = express();
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Database ──────────────────────────────────
@@ -31,17 +31,17 @@ mongoose.connect(process.env.MONGO_URI)
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc:  ["'self'"],
-      scriptSrc:   ["'self'", "'unsafe-inline'"],
-      styleSrc:    ["'self'", "'unsafe-inline'",
-                    'https://fonts.googleapis.com',
-                    'https://cdnjs.cloudflare.com'],
-      fontSrc:     ["'self'", 'https://fonts.gstatic.com',
-                    'https://cdnjs.cloudflare.com'],
-      imgSrc:      ["'self'", 'data:', 'https://res.cloudinary.com'],
-      connectSrc:  ["'self'"],
-      frameSrc:    ["'none'"],
-      objectSrc:   ["'none'"],
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'",
+        'https://fonts.googleapis.com',
+        'https://cdnjs.cloudflare.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com',
+        'https://cdnjs.cloudflare.com'],
+      imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com'],
+      connectSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
     },
   },
   crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -65,9 +65,9 @@ app.use(session({
   store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
   cookie: {
     httpOnly: true,
-    secure:   process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge:   1000 * 60 * 60 * 8,
+    maxAge: 1000 * 60 * 60 * 8,
   },
   name: 'sid',
 }));
@@ -88,13 +88,13 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 // ── API + Admin routes ────────────────────────
-app.use('/api',   publicRouter);
+app.use('/api', publicRouter);
 app.use('/admin', adminRouter);
 
 // ── Frontend page routes ──────────────────────
-app.get('/admin/login',     (_req, res) => res.sendFile(path.join(__dirname, 'public/admin/login.html')));
+app.get('/admin/login', (_req, res) => res.sendFile(path.join(__dirname, 'public/admin/login.html')));
 app.get('/admin/dashboard', (_req, res) => res.sendFile(path.join(__dirname, 'public/admin/dashboard.html')));
-app.get('*',                (_req, res) => res.sendFile(path.join(__dirname, 'public/index.html')));
+app.get('*', (_req, res) => res.sendFile(path.join(__dirname, 'public/index.html')));
 
 // ── Global error handler ──────────────────────
 // eslint-disable-next-line no-unused-vars
